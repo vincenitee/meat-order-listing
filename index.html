@@ -89,7 +89,7 @@
                             <h6>Total Kilograms</h6>
                             <i data-feather="layers"></i>
                         </div>
-                        <span class="fw-bold" x-text="$store.order.totalKilograms"></span> kgs
+                        <span class="fw-bold" x-text="$store.order.totalKilograms"></span> kg
                     </div>
                 </div>
             </div>
@@ -153,11 +153,6 @@
                             <div class="d-flex">
                                 <h6 class="fw-bold" :class="order.balance === 0 && 'text-success'" x-text="order.customerName"></h6>
                                 <div class="ms-auto d-flex gap-2">
-                                
-                                    <button class="btn btn-sm btn-primary">
-                                        Edit
-                                    </button>
-                                    
                                     <button x-data class="btn btn-sm btn-success" @click="$store.order.payOrder(order.orderId)" :disabled="order.balance === 0">
                                         Paid
                                     </button>
