@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meat Orders</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+
+    <!-- DataTable CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Main JS -->
+    <script type="module" src="js/main.js"></script>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
+
+    <!-- jQuery (Required for DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+    <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
+</head>
+<body>
+
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0" style="z-index: 99;">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="assets/logo.png" alt="" width="30" height="30">
+                Meat Orders
+            </a>
+
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#orderModal">
+                    Add Order
+                </button>
+
+                <!-- <button class="btn btn-sm btn-danger" x-data @click="$store.order.deleteOrders()">
+                    Delete All
+                </button> -->
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Cards Information -->
+    
+    <div class="container my-3">
+        <h6 class="fw-bold">Overview</h6>
+        <div class="row g-3">
+            <div class="col-6 col-sm-4 col-md-3">
+                <div x-data class="card bg-primary bg-gradient text-white" style="min-height: 100px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>Expected Sales</h6>
+                            <i data-feather="dollar-sign"></i>
+                        </div>
+                        ₱ <span class="fw-bold" x-text="$store.order.totalSales"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-3">
+                <div x-data class="card bg-success bg-gradient text-white" style="min-height: 100px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>Payment Received</h6>
+                            <i data-feather="dollar-sign"></i>
+                        </div>
+                        ₱ <span class="fw-bold" x-text="$store.order.totalPayment"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-3">
+                <div x-data class="card bg-info bg-gradient text-white" style="min-height: 100px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>Total Kilograms</h6>
+                            <i data-feather="layers"></i>
+                        </div>
+                        <span class="fw-bold" x-text="$store.order.totalKilograms"></span> kgs
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-3">
+                <div x-data class="card bg-warning bg-gradient text-white" style="min-height: 100px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>Total Orders</h6>
+                            <i data-feather="shopping-bag"></i>
+                        </div>
+                        <span class="fw-bold" x-text="$store.order.totalOrders"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-3">
+                <div x-data class="card bg-secondary bg-gradient text-white" style="min-height: 100px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>Paid Orders</h6>
+                            <i data-feather="user-check"></i>
+                        </div>
+                        <span class="fw-bold" x-text="$store.order.paidOrders"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-3">
+                <div x-data class="card bg-danger bg-gradient text-white" style="min-height: 100px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>Unpaid Orders</h6>
+                            <i data-feather="user-minus"></i>
+                        </div>
+                        <span class="fw-bold" x-text="$store.order.unpaidOrders"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Bar -->
+    <div class="container mb-3">
+        <h6 class="fw-bold">Orders</h6>
+        <div x-data class="input-group">
+            <input type="text" class="form-control form-control-sm" placeholder="Search for orders" x-model="$store.order.searchQuery" @input="$store.order.filterOrdersByName()">
+            <button class="btn btn-sm btn-secondary" @click="$store.order.clearSearch()" :disabled="$store.order.searchQuery === ''">
+                <i data-feather="x" class="icon"></i>
+            </button>
+        </div>
+
+        
+    </div>
+    
+
+    <!-- Order Cards -->
+    <div x-data="$store.order.orders"  x-init="$store.order.retrieveOrders()" class="container mt-3">
+        <div class="row">
+            <template x-for="(order, index) in $store.order.orders" :key="index">
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="card mb-3">
+                        <div class="card-header ">
+                            <div class="d-flex">
+                                <h6 class="fw-bold" :class="order.balance === 0 && 'text-success'" x-text="order.customerName"></h6>
+                                <div class="ms-auto d-flex gap-2">
+                                
+                                    <button class="btn btn-sm btn-primary">
+                                        Edit
+                                    </button>
+                                    
+                                    <button x-data class="btn btn-sm btn-success" @click="$store.order.payOrder(order.orderId)" :disabled="order.balance === 0">
+                                        Paid
+                                    </button>
+
+                                    <button x-data class="btn btn-sm btn-danger" @click="$store.order.deleteOrder(order.orderId)">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row gy-2 align-items-center">
+                                <!-- Image Section -->
+                                <div class="col-4 col-sm-12 text-center">
+                                    <img 
+                                        :src="$store.order.getImage(order.selectedParts)" 
+                                        alt="Pork cut" 
+                                        class="img-fluid rounded" 
+                                        style="height: 130px; width: auto; object-fit: contain;"
+                                    >
+                                </div>
+                                <!-- Details Section -->
+                                <div class="col-8 col-sm-12">
+                                    <table class="table table-bordered table-striped table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th>Status</th>
+                                                <td><span class="badge" :class="order.status === 'not paid' ? 'bg-danger' : 'bg-success'" x-text="order.status"></span></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Ordered Parts</th>
+                                                <td><span x-text="order.selectedParts"></span></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Quantity (kg)</th>
+                                                <td><span x-text="order.quantity"></span> kg</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Total Price</th>
+                                                <td>₱ <span x-text="order.totalPrice"></span></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Balance</th>
+                                                <td>₱ <span x-text="order.balance"></span></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Location</th>
+                                                <td><span x-text="order.location"></span></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Order Date</th>
+                                                <td><span x-text="order.orderDate"></span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+
+    <!-- Add Order Modal -->
+    <div class="modal fade" id="orderModal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="orderModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Add Meat Order</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div x-data="$store.order">
+                        <form id="orderForm need-validation" @submit.prevent="processOrder">
+                            <div class="row gy-2">
+                                <div class="col-auto w-100">
+                                    <label for="customerName" class="form-label">Customer Name</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i data-feather="user" class="icon"></i>
+                                        </span>
+                                        <input type="text" id="customerName" class="form-control form-control-sm" x-model="customerName" required>
+                                        <div class="invalid-feedback">
+                                            Provide the customer name.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- <input type="text" name="" id="" class="form-control" :value="selectedParts">    -->
+
+                                <div class="col-12">
+                                    <label for="meatType" class="form-label">Meat Part</label>
+                                    <div class="row gy-2">
+                                        <template x-for="meat in ['Mixed', 'Ulo', 'Kasim', 'Pigue','Lomo', 'Ribs', 'Pork Chop', 'Liempo', 'Pata', 'Laman Loob']" :key="meat">
+                                            <div class="col-6 col-sm-3 col-md-4">
+                                                <input 
+                                                    type="checkbox" 
+                                                    class="btn-check" 
+                                                    :id="'create-order-' + meat.toLowerCase()" 
+                                                    :value="meat" 
+                                                    autocomplete="off"
+                                                    x-model="selectedParts">
+                                                <label 
+                                                    class="btn btn-sm btn-outline-primary w-100" 
+                                                    :for="'create-order-' + meat.toLowerCase()" 
+                                                    x-text="meat">
+                                                </label>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- <input type="text" class="form-control form-control-sm" x-model="$store.order.orderId"> -->
+
+                                <div class="col-sm-6">
+                                    <label for="quantity" class="form-label">Quantity (kg)</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">
+                                            <i data-feather="layers" class="icon"></i>
+                                        </span>
+                                        <input type="number" id="quantity" min="0" step="0.25" class="form-control form-control-sm" x-model="quantity">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6">
+                                    <label for="price" class="form-label">Price</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" id="price" min="0" class="form-control form-control-sm" x-model="basePrice">
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="totalPrice" class="form-label">Total Price</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" id="totalPrice" class="form-control form-control-sm" :value="calculateTotalPrice()" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label for="payment" class="form-label">Payment (Optional)</label>
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">₱</span>
+                                        <input type="number" id="payment" min="0" class="form-control form-control-sm" x-model="payment">
+                                    </div>
+                                </div>
+                                <div class="col-auto w-100">
+                                    <label for="location" class="form-label">Location</label>
+                                    <div class="row gy-2">
+                                        <template x-for="location in ['Puzon', 'Curing', 'Tabtabungao']" :key="location">
+                                            <div class="col-6 col-sm-3 col-md-4">
+                                                <input 
+                                                    type="radio" 
+                                                    class="btn-check" 
+                                                    :id="'create-order-' + location.toLowerCase()" 
+                                                    :value="location" 
+                                                    autocomplete="off"
+                                                    x-model="selectedLocation"> <!-- Bind to a single value -->
+                                                <label 
+                                                    class="btn btn-sm btn-outline-primary w-100" 
+                                                    :for="'create-order-' + location.toLowerCase()" 
+                                                    x-text="location">
+                                                </label>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <button class="float-end btn btn-sm btn-primary mt-4">
+                                Submit
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+
+    <!-- Bootstap JS -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+</body>
+</html>

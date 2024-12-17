@@ -1,0 +1,29 @@
+body{
+    font-family: 'Inter', sans-serif;
+}
+
+table, 
+.form-label{
+    font-size: 12px;
+}
+
+img{
+    object-position: center;
+}
+
+/* th{
+    text-wrap: nowrap;
+} */
+
+.icon{
+    width: 16px;
+}
+
+.card-icon{
+    width: 18px;
+}
+
+#editOrderOffcanvas{
+    height: 35rem;
+}
+
