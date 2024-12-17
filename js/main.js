@@ -211,7 +211,6 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-
         getImage(selectedParts) {
             const meatPart = selectedParts[0].replace(/\s+/g, '_').toLowerCase();
             return `assets/pork_cuts/${meatPart}.png`;
