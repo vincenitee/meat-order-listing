@@ -3,8 +3,10 @@ import { exportToPDF } from "./exportUtils.js";
 import { showToast } from "./modals.js";
 
 const orderModal = document.getElementById('orderModal');
+const paymentModal = document.getElementById('paymentModal');
 
-const bootstrapModal = new bootstrap.Modal(orderModal);
+const orderBootstrapModal = new bootstrap.Modal(orderModal);
+const paymentBoostrapModal = new bootstrap.Modal(paymentModal);
 
 document.addEventListener('alpine:init', () => {
     Alpine.store('order', {
@@ -22,6 +24,8 @@ document.addEventListener('alpine:init', () => {
         sortLocation: '',
         sortStatus: '',
         sortPart: '',
+        depositAmount: 0,
+        selectedOrderId: '',
         
         // Order Information
         orderId: '',
@@ -191,7 +195,7 @@ document.addEventListener('alpine:init', () => {
             const addAnother = confirm('Do you want to add another order?');
 
             if (!addAnother) {
-                bootstrapModal.hide();
+                orderBootstrapModal.hide();
             }
             
             this.retrieveOrders();
@@ -246,36 +250,43 @@ document.addEventListener('alpine:init', () => {
             this.retrieveOrders();
         },
 
-        payOrder(orderId) {
-            const confirmPayment = confirm('Are you sure you want to mark this order as paid?');
+        processDeposit(orderId) {
+            const deposit = parseFloat(this.depositAmount);
 
-            if (confirmPayment) {
-                const orders = JSON.parse(localStorage.getItem('orders')) || [];
-                let isPaid = false; 
+            if (isNaN(deposit) || deposit < 0) {
+                showToast('error', 'Please enter a valid deposit amount')
+                this.resetDepositInformation()
+                return;
+            }
 
-                orders.forEach(order => {
-                    if (order.orderId === orderId) {
-                        if (order.balance === 0) {
-                            isPaid = true; 
-                            return; 
-                        }
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const order = orders.find(o => o.orderId === orderId);
 
-                        order.payment += parseInt(order.balance, 10); 
-                        order.balance = 0; 
-                        order.status = 'paid';
-                    }
-                });
+            if (order) {
+                const remainingBalance = order.balance - deposit;
 
-                if (isPaid) {
-                    showToast('error', 'Order is already paid!');
-                    return; 
+                if (remainingBalance < 0) {
+                    showToast('error', 'Deposit exceeds remaining balance!');
+                    this.resetDepositInformation();
+                    return;
                 }
 
-                localStorage.setItem('orders', JSON.stringify(orders)); 
+                order.payment += deposit;
+                order.balance = remainingBalance;
+                order.status = remainingBalance === 0 ? 'paid' : 'unpaid';
 
-                showToast('success', 'Order paid successfully!');
-                this.retrieveOrders(); 
+                localStorage.setItem('orders', JSON.stringify(orders));
+                showToast('success', 'Payment processed successfully!');
+
+                this.resetDepositInformation();
+                this.retrieveOrders();
             }
+
+        },
+
+        resetDepositInformation() {
+            this.depositAmount = 0;
+            this.selectedOrderId = '';
         },
 
         saveAsPDF(orders) {
