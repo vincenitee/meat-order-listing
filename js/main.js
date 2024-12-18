@@ -15,6 +15,7 @@ document.addEventListener('alpine:init', () => {
         filteredOrders: [],
         totalSales: 0,
         totalPayment: 0,
+        unpaidPayments: 0,
         totalKilograms: 0,
         totalOrders: 0,
         paidOrders: 0,
@@ -63,6 +64,14 @@ document.addEventListener('alpine:init', () => {
                 style: 'currency',
                 currency: 'PHP'
             }).format(totalPayment);
+        },
+
+        calculateUnpaidPayments() {
+            const unpaidPayments = this.orders.reduce((sum, order) => sum + parseFloat(order.balance), 0)
+            this.unpaidPayments = new Intl.NumberFormat('en-PH', {
+                style: 'currency',
+                currency: 'PHP'
+            }).format(unpaidPayments);
         },
 
         calculateTotalKilograms() {
@@ -217,6 +226,7 @@ document.addEventListener('alpine:init', () => {
             this.calculateTotalKilograms();
             this.calculatePaidOrders();
             this.calculateUnpaidOrders();
+            this.calculateUnpaidPayments();
         },
         
         deleteOrders() {

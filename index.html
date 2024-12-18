@@ -76,6 +76,17 @@
                 </div>
             </div>
             <div class="col-6 col-sm-4 col-md-3">
+                <div x-data class="card bg-dark bg-gradient text-white" style="min-height: 100px;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h6>Pending Payments</h6>
+                            <i data-feather="credit-card"></i>
+                        </div>
+                        <span class="fw-bold" x-text="$store.order.unpaidPayments"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-md-3">
                 <div x-data class="card bg-info bg-gradient text-white" style="min-height: 100px;">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
