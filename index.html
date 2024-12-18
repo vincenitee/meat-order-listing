@@ -132,19 +132,89 @@
     <!-- Search Bar -->
     <div class="container mb-3">
         <h6 class="fw-bold">Orders</h6>
-        <div x-data class="input-group">
+        <div x-data class="d-flex gap-2">
             <input type="text" class="form-control form-control-sm" placeholder="Search for orders" x-model="$store.order.searchQuery" @input="$store.order.filterOrdersByName()">
-            <button class="btn btn-sm btn-secondary" @click="$store.order.clearSearch()" :disabled="$store.order.searchQuery === ''">
-                <i data-feather="x" class="icon"></i>
+
+            <button class="btn btn-sm btn-primary" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                <i data-feather="filter" class="icon"></i>
             </button>
         </div>
+    </div>
 
-        
+    <!-- Filters -->
+    <div class="collapse" id="filterCollapse">
+        <div class="container mb-3">
+            <div class="card card-body">
+                <div class="row g-3">
+                    <!-- Location -->
+                    <div class="col-4 col-sm-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i data-feather="map-pin" class="icon"></i>
+                            </span>
+
+                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortLocation">
+                                <option value="">All</option>
+                                <option value="Puzon">Puzon</option>
+                                <option value="Curing">Curing</option>
+                                <option value="Tabtabungao">Tabtabungao</option>
+                            </select>
+
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-4 col-sm-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i data-feather="user" class="icon"></i>
+                            </span>
+
+                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortStatus">
+                                <option value="">All</option>
+                                <option value="paid">Paid</option>
+                                <option value="unpaid">Unpaid</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Meat Parts -->
+                    <div class="col-4 col-sm-3">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i data-feather="shopping-cart" class="icon"></i>
+                            </span>
+
+                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortPart">
+                                <option value="">All</option>
+                                <template x-for="part in ['Mixed', 'Ulo', 'Kasim', 'Pigue','Lomo', 'Ribs', 'Pork Chop', 'Liempo', 'Pata', 'Laman Loob']" :key="part">
+                                    <option :value="part" x-text="part"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-4 col-sm-3 ">
+                        <div class="d-flex gap-2">
+                            <button x-data class="btn btn-sm btn-primary" @click="$store.order.filterOrders()"> Apply</button>
+                            <button x-data class="btn btn-sm btn-secondary" @click="$store.order.clearFilters()"> Clear</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
-
     <!-- Order Cards -->
-    <div x-data="$store.order.orders"  x-init="$store.order.retrieveOrders()" class="container mt-3">
+    <div x-data="$store.order.orders" x-init="$store.order.retrieveOrders()" class="container mt-3" >
+        <div class="card" x-cloak x-show="$store.order.orders.length === 0">
+            <div class="card-body">
+                <div class="d-flex gap-1 align-items-center">
+                    <i data-feather="help-circle" class="icon me-2"></i>
+                    <span>No orders found</span>
+                </div>
+            </div>
+        </div>
         <div class="row">
             <template x-for="(order, index) in $store.order.orders" :key="index">
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -180,7 +250,7 @@
                                         <tbody>
                                             <tr>
                                                 <th>Status</th>
-                                                <td><span class="badge" :class="order.status === 'not paid' ? 'bg-danger' : 'bg-success'" x-text="order.status"></span></td>
+                                                <td><span class="badge" :class="order.status === 'unpaid' ? 'bg-danger' : 'bg-success'" x-text="order.status"></span></td>
                                             </tr>
                                             <tr>
                                                 <th>Ordered Parts</th>
@@ -236,10 +306,7 @@
                                         <span class="input-group-text">
                                             <i data-feather="user" class="icon"></i>
                                         </span>
-                                        <input type="text" id="customerName" class="form-control form-control-sm" x-model="customerName" required>
-                                        <div class="invalid-feedback">
-                                            Provide the customer name.
-                                        </div>
+                                        <input type="text" id="customerName" class="form-control form-control-sm" x-model="customerName">
                                     </div>
                                 </div>
 
