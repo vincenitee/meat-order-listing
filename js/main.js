@@ -1,4 +1,5 @@
 import { getCurrentDate, generateUID } from "./dateUtils.js";
+import { exportToPDF } from "./exportUtils.js";
 import { showToast } from "./modals.js";
 
 const orderModal = document.getElementById('orderModal');
@@ -45,11 +46,19 @@ document.addEventListener('alpine:init', () => {
         },
 
         calculateTotalSales() {
-            this.totalSales = this.orders.reduce((sum, order) => sum + parseFloat(order.totalPrice), 0);
+            const totalSales = this.orders.reduce((sum, order) => sum + parseFloat(order.totalPrice), 0);
+            this.totalSales = new Intl.NumberFormat('en-PH', {
+                style: 'currency',
+                currency: 'PHP'
+            }).format(totalSales);
         },
 
         calculateTotalPayment() {
-            this.totalPayment = this.orders.reduce((sum, order) => sum + parseFloat(order.payment), 0)
+            const totalPayment = this.orders.reduce((sum, order) => sum + parseFloat(order.payment), 0)
+            this.totalPayment = new Intl.NumberFormat('en-PH', {
+                style: 'currency',
+                currency: 'PHP'
+            }).format(totalPayment);
         },
 
         calculateTotalKilograms() {
@@ -98,13 +107,15 @@ document.addEventListener('alpine:init', () => {
             this.retrieveOrders();
 
             if (this.sortLocation !== '') {
-                this.filteredOrders = this.orders.filter(order => order.location === this.sortLocation);
+                this.orders = this.orders.filter(order => order.location === this.sortLocation);
             } 
         },
 
         filterOrdersByStatus() {
+            this.retrieveOrders();
+
             if (this.sortStatus !== '') {
-                this.filteredOrders = this.orders.filter(order => order.status === this.sortStatus)
+                this.orders = this.orders.filter(order => order.status === this.sortStatus)
             }
         },
 
@@ -112,24 +123,14 @@ document.addEventListener('alpine:init', () => {
             this.retrieveOrders();
 
             if (this.sortPart !== '') {
-                this.filteredOrders = this.orders.filter(order => order.selectedParts.includes(this.sortPart))
+                this.orders = this.orders.filter(order => order.selectedParts.includes(this.sortPart))
             }
         },
 
-        filterOrders() {
-            this.filterOrdersByLocation();
-            this.filterOrdersByStatus();
-            this.filterOrdersByMeatPart();
-
-            this.orders = this.filteredOrders;
-
-            console.log(this.orders);
-        },
-
         clearFilters() {
-            this.sortLocation;
-            this.sortStatus;
-            this.sortPart;
+            this.sortLocation = "";
+            this.sortStatus = "";
+            this.sortPart = "";
 
             this.retrieveOrders();
         },
@@ -160,7 +161,7 @@ document.addEventListener('alpine:init', () => {
 
         processOrder() {
             const validationError = this.validateOrder();
-            
+
             if (validationError) {
                 showToast('error', validationError);
                 return;
@@ -275,6 +276,10 @@ document.addEventListener('alpine:init', () => {
                 showToast('success', 'Order paid successfully!');
                 this.retrieveOrders(); 
             }
+        },
+
+        saveAsPDF(orders) {
+            exportToPDF(orders);
         },
 
         getImage(selectedParts) {

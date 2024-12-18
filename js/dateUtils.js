@@ -11,6 +11,10 @@ export function getCurrentDay() {
     return currentDate.getDate();
 }
 
+export function generateTimestamp() {
+    return new Date().toISOString().replace(/[-:.]/g, "_");
+}
+
 export function getCurrentYear() {
     return currentDate.getFullYear();
 }

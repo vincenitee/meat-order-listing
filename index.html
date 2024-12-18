@@ -8,9 +8,6 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
 
-    <!-- DataTable CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/styles.css">
 
@@ -19,17 +16,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
 
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- jsAutoTables -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    
     <!-- Main JS -->
     <script type="module" src="js/main.js"></script>
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.7/dist/cdn.min.js"></script>
 
-    <!-- jQuery (Required for DataTables) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
     <link rel="shortcut icon" href="assets/logo.png" type="image/x-icon">
 </head>
@@ -58,16 +56,16 @@
     <!-- Cards Information -->
     
     <div class="container my-3">
-        <h6 class="fw-bold">Overview</h6>
+        <h5 class="fw-bold">Overview</h5>
         <div class="row g-3">
             <div class="col-6 col-sm-4 col-md-3">
                 <div x-data class="card bg-primary bg-gradient text-white" style="min-height: 100px;">
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <h6>Expected Sales</h6>
-                            <i data-feather="dollar-sign"></i>
+                            <i data-feather="bar-chart-2"></i>
                         </div>
-                        ₱ <span class="fw-bold" x-text="$store.order.totalSales"></span>
+                        <span class="fw-bold" x-text="$store.order.totalSales"></span>
                     </div>
                 </div>
             </div>
@@ -76,9 +74,9 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <h6>Payment Received</h6>
-                            <i data-feather="dollar-sign"></i>
+                            <i data-feather="bar-chart-2"></i>
                         </div>
-                        ₱ <span class="fw-bold" x-text="$store.order.totalPayment"></span>
+                        <span class="fw-bold" x-text="$store.order.totalPayment"></span>
                     </div>
                 </div>
             </div>
@@ -131,7 +129,13 @@
     
     <!-- Search Bar -->
     <div class="container mb-3">
-        <h6 class="fw-bold">Orders</h6>
+        <div class="d-flex align-items-center mb-3">
+            <h5 class="fw-bold ">Orders</h5>
+            <button x-data class="ms-auto btn btn-sm btn-primary" @click="$store.order.saveAsPDF($store.order.orders)">
+                <i data-feather="file-text" class="icon"></i>
+                Export as PDF
+            </button>
+        </div>
         <div x-data class="d-flex gap-2">
             <input type="text" class="form-control form-control-sm" placeholder="Search for orders" x-model="$store.order.searchQuery" @input="$store.order.filterOrdersByName()">
 
@@ -145,7 +149,7 @@
     <div class="collapse" id="filterCollapse">
         <div class="container mb-3">
             <div class="card card-body">
-                <div class="row g-3">
+                <div class="row g-3 align-items-center">
                     <!-- Location -->
                     <div class="col-4 col-sm-3">
                         <div class="input-group">
@@ -153,7 +157,7 @@
                                 <i data-feather="map-pin" class="icon"></i>
                             </span>
 
-                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortLocation">
+                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortLocation" @change="$store.order.filterOrdersByLocation()">
                                 <option value="">All</option>
                                 <option value="Puzon">Puzon</option>
                                 <option value="Curing">Curing</option>
@@ -170,7 +174,7 @@
                                 <i data-feather="user" class="icon"></i>
                             </span>
 
-                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortStatus">
+                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortStatus" @change="$store.order.filterOrdersByStatus()">
                                 <option value="">All</option>
                                 <option value="paid">Paid</option>
                                 <option value="unpaid">Unpaid</option>
@@ -185,7 +189,7 @@
                                 <i data-feather="shopping-cart" class="icon"></i>
                             </span>
 
-                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortPart">
+                            <select x-data class="form-select form-select-sm" x-model="$store.order.sortPart" @change="$store.order.filterOrdersByMeatPart()">
                                 <option value="">All</option>
                                 <template x-for="part in ['Mixed', 'Ulo', 'Kasim', 'Pigue','Lomo', 'Ribs', 'Pork Chop', 'Liempo', 'Pata', 'Laman Loob']" :key="part">
                                     <option :value="part" x-text="part"></option>
@@ -194,12 +198,13 @@
                         </div>
                     </div>
 
-                    <div class="col-4 col-sm-3 ">
-                        <div class="d-flex gap-2">
-                            <button x-data class="btn btn-sm btn-primary" @click="$store.order.filterOrders()"> Apply</button>
-                            <button x-data class="btn btn-sm btn-secondary" @click="$store.order.clearFilters()"> Clear</button>
-                        </div>
+                    <!-- Clear Filters -->
+                    <div class="col-4 col-sm-3">
+                        <button x-data class="btn btn-sm btn-secondary" @click="$store.order.clearFilters()">
+                            <i data-feather="x" class="icon"></i>
+                        </button>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -223,7 +228,8 @@
                             <div class="d-flex">
                                 <h6 class="fw-bold" :class="order.balance === 0 && 'text-success'" x-text="order.customerName"></h6>
                                 <div class="ms-auto d-flex gap-2">
-                                    <button x-data class="btn btn-sm btn-success" @click="$store.order.payOrder(order.orderId)" :disabled="order.balance === 0">
+
+                                    <button x-data class="btn btn-sm btn-success"  :disabled="order.balance === 0">
                                         Paid
                                     </button>
 
@@ -286,7 +292,6 @@
             </template>
         </div>
     </div>
-
 
     <!-- Add Order Modal -->
     <div class="modal fade" id="orderModal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="orderModal">
