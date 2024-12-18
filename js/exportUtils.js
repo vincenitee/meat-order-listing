@@ -5,12 +5,6 @@ export function exportToPDF(orders) {
     // Initialize jsPDF in landscape orientation
     const doc = new jsPDF("landscape");
 
-    const logoPath = "assets/logo.png";
-    const logoWidth = 16; // Adjust logo dimensions
-    const logoHeight = 16;
-    doc.addImage(logoPath, "PNG", 10, 10, logoWidth, logoHeight);
-
-
     // Set custom font for compatibility
     doc.setFont("helvetica");
 

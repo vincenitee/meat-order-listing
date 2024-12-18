@@ -45,10 +45,6 @@
                 <button x-data class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#orderModal">
                     <i data-feather="shopping-bag" class="icon"></i>
                 </button>
-
-                <button x-data class="btn btn-secondary" @click="alert('Coming soon')">
-                    <i data-feather="settings" class="icon" ></i>
-                </button>
             </div>
         </div>
     </nav>
@@ -130,13 +126,18 @@
     <div class="container mb-3">
         <div class="d-flex align-items-center mb-3">
             <h5 class="fw-bold ">Orders</h5>
-            <button x-data class="ms-auto btn btn-primary" @click="$store.order.saveAsPDF($store.order.orders)">
+            <button x-data class="ms-auto btn btn-sm btn-primary" @click="$store.order.saveAsPDF($store.order.orders)" :disabled="$store.order.orders.length === 0">
                 <i data-feather="file-text" class="icon"></i>
                 Export as PDF
             </button>
         </div>
         <div x-data class="d-flex gap-2">
-            <input type="text" class="form-control" placeholder="Search for orders" x-model="$store.order.searchQuery" @input="$store.order.filterOrdersByName()">
+            <div class="input-group">
+                <span class="input-group-text">
+                    <i data-feather="search" class="icon"></i>
+                </span>
+                <input type="text" class="form-control" placeholder="Search for orders" x-model="$store.order.searchQuery" @input="$store.order.filterOrdersByName()">
+            </div>
 
             <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
                 <i data-feather="filter" class="icon"></i>
@@ -219,74 +220,74 @@
                 </div>
             </div>
         </div>
+
         <div class="row">
             <template x-for="(order, index) in $store.order.orders" :key="index">
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <div class="card mb-3">
-                        <div class="card-header ">
-                            <div class="d-flex">
-                                <h5 class="fw-bold" :class="order.balance === 0 && 'text-success'" x-text="order.customerName"></h5>
-                                <div class="ms-auto d-flex gap-2">
-
-                                    <button x-data class="btn btn-success" data-bs-toggle="modal" data-bs-target="#paymentModal" @click="$store.order.selectedOrderId = order.orderId"  :disabled="order.balance === 0">
-                                        <i data-feather="credit-card" class="icon"></i>
-                                    </button>
-
-                                    <button x-data class="btn btn-danger" @click="$store.order.deleteOrder(order.orderId)">
-                                        <i data-feather="trash" class="icon"></i>
-                                    </button>
-                                </div>
-                            </div>
+                    <div class="card shadow-sm mb-4">
+                        <!-- Card Header -->
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">
+                                <span x-text="order.customerName"></span>
+                            </h5>
+                            <span class="badge" :class="order.status === 'paid' ? 'bg-success' : 'bg-danger'" x-text="order.status"></span>
                         </div>
+                        <!-- Card Body -->
                         <div class="card-body">
-                            <div class="row gy-2 align-items-center">
-                                <!-- Image Section -->
-                                <div class="col-4 col-sm-12 text-center">
+                            <!-- Ordered Parts -->
+                            <div class="row mb-3">
+                                <div class="col-4 text-center">
                                     <img 
                                         :src="$store.order.getImage(order.selectedParts)" 
-                                        alt="Pork cut" 
+                                        alt="Ordered Part" 
                                         class="img-fluid rounded" 
                                         style="height: 100px; width: auto; object-fit: contain;"
                                     >
                                 </div>
-                                <!-- Details Section -->
-                                <div class="col-8 col-sm-12">
-                                    <table class="table table-bordered table-striped table-sm">
-                                        <tbody>
-                                            <tr>
-                                                <th>Status</th>
-                                                <td><span class="badge" :class="order.status === 'unpaid' ? 'bg-danger' : 'bg-success'" x-text="order.status"></span></td>
-                                            </tr>
-                                            <tr>
-                                                <th>Ordered Parts</th>
-                                                <td><span x-text="order.selectedParts"></span></td>
-                                            </tr>
-                                            <tr>
-                                                <th>Quantity (kg)</th>
-                                                <td><span x-text="order.quantity"></span> kg</td>
-                                            </tr>
-                                            <tr>
-                                                <th>Total Price</th>
-                                                <td>₱ <span x-text="order.totalPrice"></span></td>
-                                            </tr>
-                                            <tr>
-                                                <th>Balance</th>
-                                                <td>₱ <span x-text="order.balance"></span></td>
-                                            </tr>
-                                            <tr>
-                                                <th>Location</th>
-                                                <td><span x-text="order.location"></span></td>
-                                            </tr>
-                                            <tr>
-                                                <th>Order Date</th>
-                                                <td><span x-text="order.orderDate"></span></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                <div class="col-8">
+                                    <h6 class="fw-bold">Ordered Parts</h6>
+                                    <p class="mb-0" x-text="order.selectedParts">Pata</p>
                                 </div>
+                            </div>
+                            <!-- Order Details -->
+                            <div class="row">
+                                <div class="col-6">
+                                    <h6 class="fw-bold">Quantity (kg)</h6>
+                                    <p class="mb-2" x-text="order.quantity + ' kg'">60 kg</p>
+
+                                    <h6 class="fw-bold">Total Price</h6>
+                                    <p class="mb-2 text-success">₱ <span x-text="order.totalPrice"></span></p>
+
+                                    <h6 class="fw-bold">Balance</h6>
+                                    <p class="mb-2" :class="order.balance > 0 ? 'text-danger' : 'text-success'">₱ <span x-text="order.balance">0</span></p>
+                                </div>
+                                <div class="col-6">
+                                    <h6 class="fw-bold">Location</h6>
+                                    <p class="mb-2" x-text="order.location">Tabtabungao</p>
+
+                                    <h6 class="fw-bold">Order Date</h6>
+                                    <p class="mb-2" x-text="order.orderDate">18 Dec 2024</p>
+                                </div>
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="d-flex justify-content-end gap-2 mt-3">
+                                <button 
+                                    class="btn btn-success" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#paymentModal" 
+                                    :disabled="order.balance === 0"
+                                    @click="$store.order.selectedOrderId = order.orderId">
+                                    <i data-feather="credit-card" class="icon"></i> Pay
+                                </button>
+                                <button 
+                                    class="btn btn-danger" 
+                                    @click="$store.order.deleteOrder(order.orderId)">
+                                    <i data-feather="trash" class="icon"></i> Delete
+                                </button>
                             </div>
                         </div>
                     </div>
+
                 </div>
             </template>
         </div>
@@ -332,119 +333,133 @@
         </div>
     </div>
 
-
     <!-- Add Order Modal -->
     <div class="modal fade" id="orderModal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="orderModal">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
+                <!-- Modal Header -->
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5">Add Meat Order</h1>
+                    <h5 class="modal-title">
+                        <i data-feather="plus-circle" class="icon me-2"></i> Add Meat Order
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <!-- Modal Body -->
                 <div class="modal-body">
                     <div x-data="$store.order">
-                        <form id="orderForm need-validation" @submit.prevent="processOrder">
+                        <form id="orderForm" class="needs-validation" @submit.prevent="processOrder" novalidate>
+                            <!-- Customer Name -->
+                            <div class="mb-3">
+                                <label for="customerName" class="form-label">Customer Name</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text">
+                                        <i data-feather="user" class="icon"></i>
+                                    </span>
+                                    <input type="text" id="customerName" class="form-control form-control-sm" x-model="customerName" placeholder="Enter customer name" required>
+                                </div>
+                            </div>
+                            
+                            <!-- Meat Parts Selection -->
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i data-feather="shopping-cart" class="icon me-2"></i> Select Meat Parts
+                                </label>
+                                <div class="row g-2 mt-2">
+                                    <template x-for="meat in ['Mixed', 'Ulo', 'Kasim', 'Pigue','Lomo', 'Ribs', 'Pork Chop', 'Liempo', 'Pata', 'Laman Loob']" :key="meat">
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <input 
+                                                type="checkbox" 
+                                                class="btn-check" 
+                                                :id="'create-order-' + meat.toLowerCase()" 
+                                                :value="meat" 
+                                                autocomplete="off"
+                                                x-model="selectedParts">
+                                            <label 
+                                                class="btn btn-outline-primary w-100 text-truncate" 
+                                                :for="'create-order-' + meat.toLowerCase()" 
+                                                x-text="meat">
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Details -->
                             <div class="row g-3">
-                                <div class="col-auto w-100">
-                                    <label for="customerName" class="form-label">Customer Name</label>
-                                    <div class="input-group input-group-sm">
-                                        <span class="input-group-text">
-                                            <i data-feather="user" class="icon"></i>
-                                        </span>
-                                        <input type="text" id="customerName" class="form-control form-control-sm" x-model="customerName">
-                                    </div>
-                                </div>
-
-                                <!-- <input type="text" name="" id="" class="form-control" :value="selectedParts">    -->
-
-                                <div class="col-12">
-                                    <label for="meatType" class="form-label">Meat Part</label>
-                                    <div class="row g-3">
-                                        <template x-for="meat in ['Mixed', 'Ulo', 'Kasim', 'Pigue','Lomo', 'Ribs', 'Pork Chop', 'Liempo', 'Pata', 'Laman Loob']" :key="meat">
-                                            <div class="col-6 col-sm-3 col-md-4">
-                                                <input 
-                                                    type="checkbox" 
-                                                    class="btn-check" 
-                                                    :id="'create-order-' + meat.toLowerCase()" 
-                                                    :value="meat" 
-                                                    autocomplete="off"
-                                                    x-model="selectedParts">
-                                                <label 
-                                                    class="btn btn-outline-primary w-100" 
-                                                    :for="'create-order-' + meat.toLowerCase()" 
-                                                    x-text="meat">
-                                                </label>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <!-- <input type="text" class="form-control form-control-sm" x-model="$store.order.orderId"> -->
-
+                                <!-- Quantity -->
                                 <div class="col-sm-6">
                                     <label for="quantity" class="form-label">Quantity (kg)</label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-sm">
                                         <span class="input-group-text">
                                             <i data-feather="layers" class="icon"></i>
                                         </span>
-                                        <input type="number" id="quantity" min="0" step="0.25" class="form-control form-control-sm" x-model="quantity">
+                                        <input type="number" id="quantity" min="0" step="0.25" class="form-control" x-model="quantity" placeholder="Enter quantity" required>
                                     </div>
                                 </div>
-
+                                <!-- Price -->
                                 <div class="col-sm-6">
-                                    <label for="price" class="form-label">Price</label>
-                                    <div class="input-group">
+                                    <label for="price" class="form-label">Price (per kg)</label>
+                                    <div class="input-group input-group-sm">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" id="price" min="0" class="form-control form-control-sm" x-model="basePrice">
+                                        <input type="number" id="price" min="0" class="form-control" x-model="basePrice" placeholder="Enter price per kg" required>
                                     </div>
                                 </div>
+                                <!-- Total Price -->
                                 <div class="col-sm-6">
                                     <label for="totalPrice" class="form-label">Total Price</label>
-                                    <div class="input-group ">
+                                    <div class="input-group input-group-sm">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" id="totalPrice" class="form-control form-control-sm" :value="calculateTotalPrice()" readonly>
+                                        <input type="number" id="totalPrice" class="form-control" :value="calculateTotalPrice()" readonly>
                                     </div>
                                 </div>
+                                <!-- Payment -->
                                 <div class="col-sm-6">
                                     <label for="payment" class="form-label">Payment (Optional)</label>
-                                    <div class="input-group">
+                                    <div class="input-group input-group-sm">
                                         <span class="input-group-text">₱</span>
-                                        <input type="number" id="payment" min="0" class="form-control form-control-sm" x-model="payment">
+                                        <input type="number" id="payment" min="0" class="form-control" x-model="payment" placeholder="Enter payment amount">
                                     </div>
                                 </div>
-                                <div class="col-auto w-100">
-                                    <label for="location" class="form-label">Location</label>
-                                    <div class="row g-3">
-                                        <template x-for="location in ['Puzon', 'Curing', 'Tabtabungao']" :key="location">
-                                            <div class="col-6 col-sm-3 col-md-4">
-                                                <input 
-                                                    type="radio" 
-                                                    class="btn-check" 
-                                                    :id="'create-order-' + location.toLowerCase()" 
-                                                    :value="location" 
-                                                    autocomplete="off"
-                                                    x-model="selectedLocation"> <!-- Bind to a single value -->
-                                                <label 
-                                                    class="btn btn-outline-primary w-100" 
-                                                    :for="'create-order-' + location.toLowerCase()" 
-                                                    x-text="location">
-                                                </label>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </div>
-
                             </div>
-                            <button class="float-end btn btn-primary mt-4">
-                                Submit
-                            </button>
+
+                            <!-- Location Selection -->
+                            <div class="mt-4">
+                                <label class="form-label">
+                                    <i data-feather="map-pin" class="icon me-2"></i> Location
+                                </label>
+                                <div class="row g-2 mt-2">
+                                    <template x-for="location in ['Puzon', 'Curing', 'Tabtabungao']" :key="location">
+                                        <div class="col-6 col-md-4">
+                                            <input 
+                                                type="radio" 
+                                                class="btn-check" 
+                                                :id="'create-order-' + location.toLowerCase()" 
+                                                :value="location" 
+                                                autocomplete="off"
+                                                x-model="selectedLocation">
+                                            <label 
+                                                class="btn btn-outline-primary w-100" 
+                                                :for="'create-order-' + location.toLowerCase()" 
+                                                x-text="location">
+                                            </label>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-4 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i data-feather="check-circle" class="icon me-2"></i> Submit Order
+                                </button>
+                            </div>
                         </form>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
+
 
     
 
